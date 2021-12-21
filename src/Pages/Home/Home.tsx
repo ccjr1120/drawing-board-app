@@ -1,11 +1,13 @@
 import { css } from '@emotion/react';
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import Sketch from '~/sketch/main';
+import ToolBar from './ToolBar';
 
 const Home = React.memo(() => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
 
+  // size observer
   useLayoutEffect(() => {
     if (containerRef.current) {
       const observer = new ResizeObserver((entries) => {
@@ -19,12 +21,19 @@ const Home = React.memo(() => {
     }
   }, []);
 
+  //init sketch
+  const sketch = useRef<Sketch>();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useLayoutEffect(() => {
     if (canvasRef.current) {
-      new Sketch(canvasRef.current, { width: 2000, height: 2000 });
+      sketch.current = new Sketch(canvasRef.current, {
+        width: 2000,
+        height: 2000,
+      });
     }
   }, [containerSize]);
+
+  const [curTool, setCurTool] = useState<Home.toolType>();
 
   return (
     <div
@@ -34,6 +43,18 @@ const Home = React.memo(() => {
         width: 100%;
       `}
     >
+      <ToolBar
+        inheritCss={css`
+          position: absolute;
+          top: 35%;
+          transform: translateY(-50%);
+        `}
+        value={curTool}
+        onChange={(item) => {
+          setCurTool(item);
+          sketch.current?.updateTool(item.name);
+        }}
+      />
       <div
         css={css`
           width: ${containerSize.width}px;
@@ -47,6 +68,7 @@ const Home = React.memo(() => {
           css={css`
             width: ${containerSize.width}px;
             height: ${containerSize.height}px;
+            ${curTool && `cursor: url(${curTool.icon}), pointer;`}
           `}
         />
       </div>

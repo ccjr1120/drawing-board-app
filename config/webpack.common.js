@@ -27,6 +27,18 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.(png|jpe?g|gif)$/i,
+        type: 'asset',
+        generator: {
+          filename: 'assets/[name][hash:8][ext]',
+        },
+        parser: {
+          dataUrlCondition: {
+            maxSize: 10 * 1024,
+          },
+        },
+      },
+      {
         test: /\.(tsx|ts)?$/,
         use: ['babel-loader'],
         exclude: /node_modules/,

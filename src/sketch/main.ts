@@ -35,6 +35,12 @@ export default class Sketch {
     this.mergeLayer();
   }
 
+  public updateTool(name: string) {
+    if (name === 'pencil') {
+      console.log(name);
+    }
+  }
+
   private mergeLayer() {
     const { width, height } = this.dom;
     if (this.ctx) {
