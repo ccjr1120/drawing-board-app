@@ -1,7 +1,8 @@
 import { css } from '@emotion/react';
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Sketch from '~/sketch/main';
 import ToolBar from './ToolBar';
+import tools from './ToolBar/tools';
 
 const Home = React.memo(() => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -25,16 +26,22 @@ const Home = React.memo(() => {
   const sketch = useRef<Sketch>();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useLayoutEffect(() => {
-    if (canvasRef.current) {
+    if (canvasRef.current && !sketch.current) {
       sketch.current = new Sketch(canvasRef.current, {
         width: 2000,
         height: 2000,
       });
+    } else {
+      if (sketch.current && canvasRef.current) {
+        sketch.current.setDom(canvasRef.current);
+      }
     }
   }, [containerSize]);
 
-  const [curTool, setCurTool] = useState<Home.toolType>();
-
+  const [curTool, setCurTool] = useState<Home.toolType>(tools[2]);
+  useEffect(() => {
+    sketch.current?.updateTool(curTool.name);
+  }, []);
   return (
     <div
       ref={containerRef}

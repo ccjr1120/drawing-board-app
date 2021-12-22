@@ -11,4 +11,13 @@ declare namespace Sketch {
     dom: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
   }
+  interface lineDataType {
+    layer: layerType;
+    points: Array<coordinateType>;
+  }
+
+  interface toolType<T> {
+    name: string;
+    bean: T | null;
+  }
 }
