@@ -23,3 +23,12 @@ export function getCellCoorPoint(
   }
   return cellPoints;
 }
+
+export function calcDistanceByPoints(points: Array<Sketch.coordinateType>) {
+  if (points.length >= 2) {
+    const startP = points[0];
+    const endP = points[points.length - 1];
+    return { dx: endP.x - startP.x, dy: endP.y - startP.y };
+  }
+  return { dx: 0, dy: 0 };
+}

@@ -2,6 +2,7 @@ import { getCanvasCenterPos, getCellCoorPoint } from './helpers/calcFuns';
 import { drawPointsForBackground } from './helpers/drawFuns';
 import * as layerHelpers from './helpers/layerHelpers';
 import BaseClass from './tools/BaseClass';
+import HandClass from './tools/HandClass';
 import PencilClass from './tools/PencilClass';
 
 export default class Sketch {
@@ -10,6 +11,7 @@ export default class Sketch {
   viewportPos: Sketch.coordinateType;
   lineList: Array<Sketch.lineDataType> = [];
   totalSize: Sketch.containerSizeType;
+  containerSize: Sketch.containerSizeType;
   curAction: Sketch.toolType<BaseClass> = { name: '', bean: null };
   /**
    *
@@ -23,6 +25,7 @@ export default class Sketch {
   ) {
     this.ctx = dom.getContext('2d');
     const { width, height } = dom.getBoundingClientRect();
+    this.containerSize = { width, height };
     if (!totalSize) {
       this.totalSize = { width, height };
     } else {
@@ -52,6 +55,18 @@ export default class Sketch {
           this.mergeLayer();
         }
       );
+    } else if (name === 'hand') {
+      this.curAction.bean = new HandClass(this.dom, (dx, dy) => {
+        const { width: totalW, width: totalH } = this.totalSize;
+        const { width: vw, width: vh } = this.containerSize;
+        const { x: vx, y: vy } = this.viewportPos;
+        const rx =
+          vx - dx <= 0 ? 0 : vx - dx + vw <= totalW ? vx - dx : totalW - vw;
+        const ry =
+          vy - dy <= 0 ? 0 : vy - dy + vh <= totalH ? vy - dy : totalH - vh;
+        this.viewportPos = { x: rx, y: ry };
+        this.mergeLayer();
+      });
     }
   }
 
