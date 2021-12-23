@@ -4,6 +4,7 @@ import * as layerHelpers from './helpers/layerHelpers';
 import BaseClass from './tools/BaseClass';
 import HandClass from './tools/HandClass';
 import PencilClass from './tools/PencilClass';
+import PointerClass from './tools/PointerClass';
 
 export default class Sketch {
   background: HTMLCanvasElement;
@@ -43,7 +44,7 @@ export default class Sketch {
   public updateTool(name: string) {
     this.curAction.name = name;
     if (this.curAction.bean) {
-      this.curAction.bean.removeSelfEventListener();
+      this.curAction.bean.remove();
     }
     if (name === 'pencil') {
       this.curAction.bean = new PencilClass(
@@ -57,9 +58,20 @@ export default class Sketch {
         this.dom,
         this.updateViewport.bind(this)
       );
+    } else if (name === 'pointer') {
+      this.curAction.bean = new PointerClass(
+        this.dom,
+        this.viewportPos,
+        this.lineList,
+        this.updateLineData.bind(this)
+      );
     }
   }
 
+  private updateLineData(index: number, lineData: Sketch.lineDataType) {
+    this.lineList[index] = lineData;
+    this.mergeLayer();
+  }
   private addNewLineCb(lineData: Sketch.lineDataType) {
     this.lineList.push(lineData);
     this.mergeLayer();

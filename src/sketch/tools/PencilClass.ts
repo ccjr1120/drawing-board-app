@@ -1,3 +1,4 @@
+import { drawLineByPoints } from '../helpers/drawFuns';
 import { createLayer } from '../helpers/layerHelpers';
 import BaseClass from './BaseClass';
 
@@ -6,11 +7,11 @@ export default class PencilClass extends BaseClass {
   points: Array<Sketch.coordinateType> = [];
   constructor(
     dom: HTMLCanvasElement,
-    public viewportPos: Sketch.coordinateType,
+    viewportPos: Sketch.coordinateType,
     public totalSize: Sketch.containerSizeType,
     public newLineCb: (lineData: Sketch.lineDataType) => void
   ) {
-    super(dom);
+    super(dom, viewportPos);
   }
 
   mouseDown(e: MouseEvent) {
@@ -19,7 +20,7 @@ export default class PencilClass extends BaseClass {
       const { x, y } = this.getXYByEvent(e);
       this.points.push({ x, y });
       this.ctx.beginPath();
-      this.ctx.moveTo(x, y);
+      this.ctx.moveTo(x - this.viewportPos.x, y - this.viewportPos.y);
     }
   }
 
@@ -29,7 +30,7 @@ export default class PencilClass extends BaseClass {
     }
     const coor = this.getXYByEvent(e);
     this.points.push(coor);
-    this.ctx?.lineTo(coor.x, coor.y);
+    this.ctx?.lineTo(coor.x - this.viewportPos.x, coor.y - this.viewportPos.y);
     this.ctx?.stroke();
   }
 
@@ -37,20 +38,7 @@ export default class PencilClass extends BaseClass {
     const dom = createLayer(this.totalSize);
     const ctx = dom.getContext('2d');
     if (ctx) {
-      const { x: vx, y: vy } = this.viewportPos;
-      ctx.beginPath();
-      this.points.map((item, i) => {
-        let { x, y } = item;
-        x += vx;
-        y += vy;
-        if (i === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
-        return { x, y };
-      });
-      ctx.stroke();
+      this.points = drawLineByPoints(ctx, this.points);
       this.isDown = false;
       this.newLineCb({ layer: { dom, ctx }, points: this.points });
     }

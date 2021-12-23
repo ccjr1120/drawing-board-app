@@ -8,7 +8,7 @@ export default class HandClass extends BaseClass {
     dom: HTMLCanvasElement,
     public updateViewport: (dx: number, dy: number) => void
   ) {
-    super(dom);
+    super(dom, { x: 0, y: 0 });
   }
 
   mouseDown() {

@@ -2,7 +2,10 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 export default class BaseClass {
   ctx: CanvasRenderingContext2D | null;
-  constructor(public dom: HTMLCanvasElement) {
+  constructor(
+    public dom: HTMLCanvasElement,
+    public viewportPos: Sketch.coordinateType
+  ) {
     this.ctx = dom.getContext('2d');
     this.mouseDown = this.mouseDown.bind(this);
     this.mouseMove = this.mouseMove.bind(this);
@@ -16,9 +19,12 @@ export default class BaseClass {
     if (this.ctx) {
       const { x, y } = { x: 0, y: 0 };
       const { offsetLeft: left, offsetTop: top } = this.ctx?.canvas;
-      return { x: x + e.pageX - left, y: y + e.pageY - top };
+      return {
+        x: this.viewportPos.x + x + e.pageX - left,
+        y: this.viewportPos.y + y + e.pageY - top,
+      };
     }
-    return { x: 0, y: 0 };
+    return this.viewportPos;
   }
 
   getContainerSizeByDom() {
@@ -30,7 +36,7 @@ export default class BaseClass {
   mouseMove(e?: MouseEvent) {}
 
   mouseUp(e?: MouseEvent) {}
-  public removeSelfEventListener() {
+  public remove() {
     this.dom.removeEventListener('mousedown', this.mouseDown);
     this.dom.removeEventListener('mousemove', this.mouseMove);
     this.dom.removeEventListener('mouseup', this.mouseUp);
