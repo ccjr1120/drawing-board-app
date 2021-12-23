@@ -2,12 +2,14 @@ import { getCanvasCenterPos, getCellCoorPoint } from './helpers/calcFuns';
 import { drawPointsForBackground } from './helpers/drawFuns';
 import * as layerHelpers from './helpers/layerHelpers';
 import BaseClass from './tools/BaseClass';
+import EraserClass from './tools/EraserClass';
 import HandClass from './tools/HandClass';
 import PencilClass from './tools/PencilClass';
 import PointerClass from './tools/PointerClass';
 
 export default class Sketch {
   background: HTMLCanvasElement;
+  eraser: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D | null;
   viewportPos: Sketch.coordinateType;
   lineList: Array<Sketch.lineDataType> = [];
@@ -38,6 +40,9 @@ export default class Sketch {
     this.background = layerHelpers.createLayer(this.totalSize);
     const points = getCellCoorPoint(this.totalSize, 20);
     drawPointsForBackground(this.background, points);
+
+    this.eraser = layerHelpers.createLayer(this.totalSize);
+
     this.mergeLayer();
   }
 
@@ -65,6 +70,14 @@ export default class Sketch {
         this.lineList,
         this.updateLineData.bind(this)
       );
+    } else {
+      this.curAction.bean = new EraserClass(
+        this.dom,
+        this.viewportPos,
+        this.eraser,
+        this.lineList,
+        this.mergeLayer.bind(this)
+      );
     }
   }
 
@@ -91,6 +104,7 @@ export default class Sketch {
   private mergeLayer() {
     if (this.ctx) {
       const layerList = [];
+      layerList.push(this.eraser);
       layerList.push(this.background);
       layerList.push(...this.lineList.map((item) => item.layer.dom));
       layerHelpers.mergeLayer(this.ctx, this.viewportPos, layerList);
