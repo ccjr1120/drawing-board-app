@@ -50,24 +50,30 @@ export default class Sketch {
         this.dom,
         this.viewportPos,
         this.totalSize,
-        (lineData: Sketch.lineDataType) => {
-          this.lineList.push(lineData);
-          this.mergeLayer();
-        }
+        this.addNewLineCb.bind(this)
       );
     } else if (name === 'hand') {
-      this.curAction.bean = new HandClass(this.dom, (dx, dy) => {
-        const { width: totalW, width: totalH } = this.totalSize;
-        const { width: vw, width: vh } = this.containerSize;
-        const { x: vx, y: vy } = this.viewportPos;
-        const rx =
-          vx - dx <= 0 ? 0 : vx - dx + vw <= totalW ? vx - dx : totalW - vw;
-        const ry =
-          vy - dy <= 0 ? 0 : vy - dy + vh <= totalH ? vy - dy : totalH - vh;
-        this.viewportPos = { x: rx, y: ry };
-        this.mergeLayer();
-      });
+      this.curAction.bean = new HandClass(
+        this.dom,
+        this.updateViewport.bind(this)
+      );
     }
+  }
+
+  private addNewLineCb(lineData: Sketch.lineDataType) {
+    this.lineList.push(lineData);
+    this.mergeLayer();
+  }
+  private updateViewport(dx: number, dy: number) {
+    const { width: totalW, width: totalH } = this.totalSize;
+    const { width: vw, width: vh } = this.containerSize;
+    const { x: vx, y: vy } = this.viewportPos;
+    const rx =
+      vx - dx <= 0 ? 0 : vx - dx + vw <= totalW ? vx - dx : totalW - vw;
+    const ry =
+      vy - dy <= 0 ? 0 : vy - dy + vh <= totalH ? vy - dy : totalH - vh;
+    this.viewportPos = { x: rx, y: ry };
+    this.mergeLayer();
   }
 
   private mergeLayer() {
@@ -81,6 +87,7 @@ export default class Sketch {
 
   public setDom(dom: HTMLCanvasElement) {
     const { width, height } = dom.getBoundingClientRect();
+    this.containerSize = { width, height };
     this.dom = dom;
     this.ctx = dom.getContext('2d');
     this.viewportPos = getCanvasCenterPos({ width, height }, this.totalSize);
